@@ -17,13 +17,6 @@ thetas = {
 }
 
 
-# some values close to zero to sample
-thetas_fine_grain = {
-    "theta_pi_18": np.pi / 18,
-    "theta_pi_9": np.pi / 9
-}
-
-
 # different parameter grids
 grids = {
     'coarse': ParameterGrid(delta_a=0.05, delta_r_tilde_plus=0.1),
