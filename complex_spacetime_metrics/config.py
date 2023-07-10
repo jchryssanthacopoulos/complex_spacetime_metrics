@@ -2,6 +2,8 @@
 
 import numpy as np
 
+from complex_spacetime_metrics.parameter_grid import ParameterGrid
+
 
 # different theta values to sweep over
 thetas = {
@@ -15,7 +17,9 @@ thetas = {
 }
 
 
-# parameter grid
-a_vals = np.arange(0, 1.005, 0.005)
-r_tilde_plus_vals = np.arange(-1, 1.01, 0.01)
-a_vals_grid, r_tilde_plus_vals_grid = np.meshgrid(a_vals, r_tilde_plus_vals)
+# different parameter grids
+grids = {
+    'coarse': ParameterGrid(delta_a=0.05, delta_r_tilde_plus=0.1),
+    'medium': ParameterGrid(delta_a=0.01, delta_r_tilde_plus=0.01),
+    'fine': ParameterGrid(delta_a=0.005, delta_r_tilde_plus=0.01)
+}
