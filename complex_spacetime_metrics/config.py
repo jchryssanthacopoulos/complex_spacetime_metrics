@@ -17,6 +17,13 @@ thetas = {
 }
 
 
+thetas_fine_grain = {
+    "theta_0": 0,
+    "theta_pi_8": np.pi / 8,
+    "theta_pi_4": np.pi / 4
+}
+
+
 # different parameter grids
 grids = {
     'coarse': ParameterGrid(delta_a=0.05, delta_r_tilde_plus=0.1),
