@@ -52,7 +52,7 @@ class AnalyticalRoots(AdmissibilityEvaluator):
 
         """
         # restrict to given theta
-        if theta_val:
+        if theta_val is not None:
             roots = [root.subs({mt.theta: theta_val}) for root in roots]
             discrim = discrim.subs({mt.theta: theta_val})
 
