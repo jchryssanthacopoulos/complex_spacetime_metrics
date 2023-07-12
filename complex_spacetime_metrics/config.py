@@ -8,8 +8,6 @@ from complex_spacetime_metrics.parameter_grid import ParameterGrid
 # different theta values to sweep over
 thetas = {
     "theta_0": 0,
-    "theta_pi_12": np.pi / 12,
-    "theta_pi_6": np.pi / 6,
     "theta_pi_4": np.pi / 4,
     "theta_pi_2": np.pi / 2,
     "theta_3_pi_4": 3 * np.pi / 4,
@@ -17,10 +15,17 @@ thetas = {
 }
 
 
+# this seems better
 thetas_fine_grain = {
     "theta_0": 0,
     "theta_pi_8": np.pi / 8,
     "theta_pi_4": np.pi / 4
+}
+
+
+thetas_fine_grain_2 = {
+    "theta_pi_18": np.pi / 18,
+    "theta_pi_9": np.pi / 9
 }
 
 
