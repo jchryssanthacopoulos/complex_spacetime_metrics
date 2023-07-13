@@ -79,6 +79,10 @@ class AnalyticalRoots(AdmissibilityEvaluator):
 
         for root in roots:
             r = root.subs({mt.a: a_val, mt.r_tilde_plus: r_tilde_plus_val}).evalf()
+
+            if r == sympy.zoo:
+                return False
+
             if r != sympy.nan:
                 if np.abs(r.coeff(sympy.I)) < 1e-10:
                     if r.is_real:
