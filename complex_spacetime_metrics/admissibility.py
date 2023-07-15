@@ -178,6 +178,11 @@ class PointwiseAnalyticalRoots(AdmissibilityEvaluator):
         if not roots:
             print(f"No roots found for a = {a_val}, r_tilde_plus = {r_tilde_plus_val}")
 
+            # no roots found, so function does not cross the axis
+            # check sign at a given r_tilde value and use that to decide if condition
+            # is satisfied
+            return bool(cond_params.subs({mt.r_tilde: r_tilde_plus_val}))
+
         for r in roots:
             if r != sympy.nan:
                 if np.abs(r.coeff(sympy.I)) < 1e-10:
@@ -189,3 +194,67 @@ class PointwiseAnalyticalRoots(AdmissibilityEvaluator):
                         return False
 
         return True
+
+
+class RangeSweep(AdmissibilityEvaluator):
+
+    def admissibility(self, pgrid, theta_val, angle_1, angle_2, angle_3, num_r_tilde_evals=200, filename=None):
+        """Determine whether the metric is admissible for given values of the parameters.
+
+        Args:
+            pgrid: Object representing parameter grid
+            theta_val: Value of theta to evaluate admissibility for
+            angle_1: Expression for first angle
+            angle_2: Expression for second angle
+            angle_3: Expression for third angle
+            num_r_tilde_evals: Number of evaluations of r_tilde that should be performed
+            filename: Name of file to save admissible map and parameter grid to
+
+        Returns:
+            Tuple of grids for angles 1, 2, and 3
+
+        """
+        angle_1 = angle_1.subs({mt.theta: theta_val})
+        angle_2 = angle_2.subs({mt.theta: theta_val})
+        angle_3 = angle_3.subs({mt.theta: theta_val})
+
+        r_tilde_multiplers = np.linspace(0.001, 4, num_r_tilde_evals)
+
+        size_map = (num_r_tilde_evals,) + pgrid.grid_size
+
+        angle_1_map = np.zeros(size_map, dtype=float)
+        angle_2_map = np.zeros(size_map, dtype=float)
+        angle_3_map = np.zeros(size_map, dtype=float)
+
+        with tqdm(total=np.prod(pgrid.grid_size)) as pbar:
+            for i in range(pgrid.grid_size[0]):
+                for j in range(pgrid.grid_size[1]):
+                    a_val = pgrid.a_vals_grid[i, j]
+                    r_tilde_plus_val = pgrid.r_tilde_plus_vals_grid[i, j]
+
+                    angle_1_val = angle_1.subs({mt.a: a_val, mt.r_tilde_plus: r_tilde_plus_val})
+                    angle_2_val = angle_2.subs({mt.a: a_val, mt.r_tilde_plus: r_tilde_plus_val})
+                    angle_3_val = angle_3.subs({mt.a: a_val, mt.r_tilde_plus: r_tilde_plus_val})
+
+                    for k, r_tilde_mult in enumerate(r_tilde_multiplers):
+                        r_tilde_val = r_tilde_plus_val + r_tilde_mult * np.abs(r_tilde_plus_val)
+
+                        angle_1_map[k, i, j] = angle_1_val.subs({mt.r_tilde: r_tilde_val}).evalf()
+                        angle_2_map[k, i, j] = angle_2_val.subs({mt.r_tilde: r_tilde_val}).evalf()
+                        angle_3_map[k, i, j] = angle_3_val.subs({mt.r_tilde: r_tilde_val}).evalf()
+
+                    pbar.update(1)
+
+        if filename:
+            file_obj = {
+                'a_vals': pgrid.a_vals_grid,
+                'r_tilde_plus_vals': pgrid.r_tilde_plus_vals_grid,
+                'theta_val': theta_val,
+                'angle_1': angle_1_map,
+                'angle_2': angle_2_map,
+                'angle_3': angle_3_map
+            }
+            with open(filename, 'wb') as f:
+                pickle.dump(file_obj, f)
+
+        return angle_1_map, angle_2_map, angle_3_map
