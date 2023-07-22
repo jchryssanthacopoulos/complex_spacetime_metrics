@@ -1,12 +1,14 @@
 """Contains utilities that help with data processing."""
 
 import pickle
+from typing import List
 
+import numpy as np
 from scipy.interpolate import RegularGridInterpolator
 
 
 def interpolate_admissible_maps(file_1: str, file_2: str, new_filename: str):
-    """Interpolate admissible map in file 1 to the grid of file 2 and save
+    """Interpolate admissible map in file 1 to the grid of file 2 and save.
 
     Args:
         file_1: File to interpolate
@@ -41,4 +43,34 @@ def interpolate_admissible_maps(file_1: str, file_2: str, new_filename: str):
         'admissible_map': data_new
     }
     with open(new_filename, 'wb') as f:
+        pickle.dump(file_obj, f)
+
+
+def combine_results(filename: str, files_to_combine: List[str]):
+    """Combine the maps from several files.
+
+    Args:
+        filename: File to save final result
+        files_to_combine: List of files to combine
+
+    """
+    with open(files_to_combine[0], 'rb') as f:
+        data = pickle.load(f)
+        a_vals = data["a_vals"]
+        r_tilde_plus_vals = data["r_tilde_plus_vals"]
+        theta_val = data["theta_val"]
+        admissible_map = data["admissible_map"]
+
+    for new_file in files_to_combine[1:]:
+        with open(new_file, 'rb') as f:
+            data = pickle.load(f)
+            admissible_map = np.logical_and(admissible_map, data["admissible_map"])
+
+    file_obj = {
+        'a_vals': a_vals,
+        'r_tilde_plus_vals': r_tilde_plus_vals,
+        'theta_val': theta_val,
+        'admissible_map': admissible_map
+    }
+    with open(filename, 'wb') as f:
         pickle.dump(file_obj, f)

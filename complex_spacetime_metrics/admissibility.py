@@ -232,18 +232,38 @@ class RangeSweep(AdmissibilityEvaluator):
                     a_val = pgrid.a_vals_grid[i, j]
                     r_tilde_plus_val = pgrid.r_tilde_plus_vals_grid[i, j]
 
-                    angle_1_val = angle_1.subs({mt.a: a_val, mt.r_tilde_plus: r_tilde_plus_val})
-                    angle_2_val = angle_2.subs({mt.a: a_val, mt.r_tilde_plus: r_tilde_plus_val})
-                    angle_3_val = angle_3.subs({mt.a: a_val, mt.r_tilde_plus: r_tilde_plus_val})
+                    try:
+                        angle_1_val = angle_1.subs({mt.a: a_val, mt.r_tilde_plus: r_tilde_plus_val})
+                        angle_2_val = angle_2.subs({mt.a: a_val, mt.r_tilde_plus: r_tilde_plus_val})
+                        angle_3_val = angle_3.subs({mt.a: a_val, mt.r_tilde_plus: r_tilde_plus_val})
+                    except TypeError:
+                        # this is likely due to beta = nan, which leads to an invalid comparison for angles 1 and 2
+                        # print(f"Error encountered on (a, r_tilde_plus) = {a_val}, {r_tilde_plus_val}")
+                        angle_1_map[:, i, j] = np.nan
+                        angle_2_map[:, i, j] = np.nan
+                        angle_3_map[:, i, j] = np.nan
+                        continue
 
                     for k, r_tilde_mult in enumerate(r_tilde_multiplers):
                         r_tilde_val = r_tilde_plus_val + r_tilde_mult * np.abs(r_tilde_plus_val)
 
-                        angle_1_map[k, i, j] = angle_1_val.subs({mt.r_tilde: r_tilde_val}).evalf()
-                        angle_2_map[k, i, j] = angle_2_val.subs({mt.r_tilde: r_tilde_val}).evalf()
-                        angle_3_map[k, i, j] = angle_3_val.subs({mt.r_tilde: r_tilde_val}).evalf()
+                        try:
+                            angle_1_map[k, i, j] = angle_1_val.subs({mt.r_tilde: r_tilde_val}).evalf()
+                            angle_2_map[k, i, j] = angle_2_val.subs({mt.r_tilde: r_tilde_val}).evalf()
+                            angle_3_map[k, i, j] = angle_3_val.subs({mt.r_tilde: r_tilde_val}).evalf()
+                        except TypeError:
+                            # print(
+                            #     f"Error encountered on (a, r_tilde_plus, r_tilde) = {a_val}, {r_tilde_plus_val}, "
+                            #     f"{r_tilde_val}"
+                            # )
+                            angle_1_map[k, i, j] = np.nan
+                            angle_2_map[k, i, j] = np.nan
+                            angle_3_map[k, i, j] = np.nan
 
                     pbar.update(1)
+
+
+        admissible_map = np.all(angle_1_map + angle_2_map + angle_3_map < np.pi - 1e-10, axis=0)
 
         if filename:
             file_obj = {
@@ -252,7 +272,8 @@ class RangeSweep(AdmissibilityEvaluator):
                 'theta_val': theta_val,
                 'angle_1': angle_1_map,
                 'angle_2': angle_2_map,
-                'angle_3': angle_3_map
+                'angle_3': angle_3_map,
+                'admissible_map': admissible_map
             }
             with open(filename, 'wb') as f:
                 pickle.dump(file_obj, f)
