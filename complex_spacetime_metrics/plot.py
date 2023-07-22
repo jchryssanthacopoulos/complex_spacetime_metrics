@@ -4,6 +4,7 @@ import pickle
 
 import matplotlib.pyplot as plt
 import sympy
+import tikzplotlib
 
 
 def plot_admissibility(pgrid, admissible_map, filename=None):
@@ -22,7 +23,7 @@ def plot_admissibility(pgrid, admissible_map, filename=None):
         plt.close()
 
 
-def plot_admissibility_from_file(filename, plotname):
+def plot_admissibility_from_file(filename, plotname, tikz_plotname=None):
     """Plot admissibility map from file and save to a pdf."""
     with open(filename, 'rb') as f:
         data = pickle.load(f)
@@ -30,6 +31,10 @@ def plot_admissibility_from_file(filename, plotname):
     _plot(data['admissible_map'], data['a_vals'], data['r_tilde_plus_vals'], data['a_vals'][0, :])
 
     plt.savefig(plotname, bbox_inches='tight', dpi=300)
+
+    if tikz_plotname:
+        tikzplotlib.save(tikz_plotname)
+
     plt.close()
 
 
