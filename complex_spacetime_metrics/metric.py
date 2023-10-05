@@ -84,7 +84,7 @@ class Metric3D:
 
         # r_tilde
         metric_matrix[2][0] = self.metric.coeff(dr_tilde * dtau) / 2
-        metric_matrix[2][0] = self.metric.coeff(dr_tilde * dphi_tilde) / 2
+        metric_matrix[2][1] = self.metric.coeff(dr_tilde * dphi_tilde) / 2
         metric_matrix[2][2] = self.metric.coeff(dr_tilde ** 2)
 
         g_mat = sympy.Matrix(metric_matrix)
